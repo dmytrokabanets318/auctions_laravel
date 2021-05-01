@@ -62,15 +62,12 @@
 							<div v-else>
 								<input type="text" class="form-control" v-model="auction.bid_price" :placeholder="'Bid price: ' + auction.min_price + '€'">
 							</div>
-							<div class="input-group-append">
-								<button class="btn btn-outline-secondary"
-								@click="bidAuction(auction, auction.bid_price)" type="button">Bid</button>
+							<div class="input-group-append form-control btn btn-outline-secondary"
+							style="display: flex; justify-content: center; align-items: center; border-color: #a0a4a9" 
+							@click="bidAuction(auction, auction.bid_price)">
+							Bid
 							</div>
 						</div>
-						<div v-show="auction.bidded">
-							<alertBox :message="alert.message" 
-							:type="alert.type" :show="alert.show">
-						</alertBox>
 					</div>
 
 				</div>
@@ -81,41 +78,37 @@
 
 	</div>
 
-</div>
+	<div class="container" v-else>
+		<div class="row">
+			<div class="col"></div>
+			<div class="col-8">
 
-<div class="container" v-else>
-	<div class="row">
-		<div class="col"></div>
-		<div class="col-8">
-			
-			<div class="jumbotron" style="margin-top: 250px;">
-				<h1>It appears there are no auctions active...</h1>
-				<!-- TODO later -> use v-if to determine if user is logged in -->
-				<h4 v-if="this.$store.state.user == ''">Login or register to start one!</h4>
-				<div v-else class="text-center"> 
-					<h3>Create one yourself!</h3>
-					<br>
-					<router-link to="create-auction">
-						<button type="button" class="btn btn-primary">Create Auction</button>
-					</router-link>	
-				</div>
-			</div>	
-			
+				<div class="jumbotron" style="margin-top: 250px;">
+					<h1>It appears there are no auctions active...</h1>
+					<!-- TODO later -> use v-if to determine if user is logged in -->
+					<h4 v-if="this.$store.state.user == ''">Login or register to start one!</h4>
+					<div v-else class="text-center"> 
+						<h3>Create one yourself!</h3>
+						<br>
+						<router-link to="create-auction">
+							<button type="button" class="btn btn-primary">Create Auction</button>
+						</router-link>	
+					</div>
+				</div>	
+
+			</div>
+			<div class="col"></div>
 		</div>
-		<div class="col"></div>
-	</div>
-</div>	
+	</div>	
 
-<div class="container mb-5">
-</div>
+	<div class="container mb-5">
+	</div>
 
 </div>
 
 </template>
 
 <script>
-	
-	import alertBox from './alertBox.vue';
 
 	export default {
 
@@ -127,11 +120,6 @@
 				hasAuctions: false,
 				search: "",
 				hasSearchedAuctions: true,
-				alert: {
-					message: "",
-					type: "",
-					show: false
-				},
 				user: this.$store.getters.getUser,
 				api_token: this.$store.getters.getUserToken,
 				orderBy: {
@@ -153,6 +141,7 @@
 		methods: {
 
 			getAuctions(order){
+				console.log(this.$store.state);
 				this.hasSearchedAuctions = true;
 				this.$axios.get('/api/auctions?orderBy='+order)
 				.then(response => {
@@ -165,22 +154,23 @@
 			},
 
 			bidAuction(auction, bidPrice){
-				this.alert.show = false;
+				
 				let email = this.$store.state.user;
 				this.$axios.put('/api/auction/' + auction.id, {email, bidPrice},
 					{headers: {'Authorization' : 'Bearer ' + this.api_token}})
 				.then(response => {
-					this.alert.message = response.data.message;
+					
+					this.$toasted.success(`Auction ${auction.name} bidded with ${bidPrice}`);
 					auction.bidded = true;
 					if(response.data.code != 200){
-						this.alert.type = "alert alert-danger";
+						
 					}else{
-						this.alert.type = "alert alert-success";
+						
 						auction.last_bid_price = bidPrice;
 						//this.getAuctions();
 					}
 
-					this.alert.show = true;
+					
 
 				})
 				.catch(error => {
