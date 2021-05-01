@@ -2231,7 +2231,7 @@ __webpack_require__.r(__webpack_exports__);
         formData.append('description', this.auction.description);
         formData.append('min_price', this.auction.min_price);
         formData.append('email', this.$store.state.user);
-        axios.post('api/auction', formData, {
+        this.$axios.post('api/auction', formData, {
           headers: {
             'Authorization': 'Bearer ' + this.api_token
           }
@@ -22092,7 +22092,7 @@ var render = function() {
                       attrs: {
                         width: "300",
                         height: "300",
-                        src: "storage\\upload\\" + auction.photo_url,
+                        src: "upload\\" + auction.photo_url,
                         alt: "Auction image"
                       }
                     }),
@@ -22889,7 +22889,7 @@ var render = function() {
                       staticClass: "border border-gray border-rounded",
                       staticStyle: { float: "right", position: "relative" },
                       attrs: {
-                        src: "storage\\upload\\" + auction.photo_url,
+                        src: "upload\\" + auction.photo_url,
                         alt: "Auction image",
                         width: "200",
                         height: "150"

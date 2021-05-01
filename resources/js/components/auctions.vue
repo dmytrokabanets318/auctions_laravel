@@ -43,7 +43,7 @@
 				
 				<div class="card mt-5" style="border-radius: 10px;">
 
-					<img class="card-img-top" width="300" height="300" :src="'storage\\upload\\' + auction.photo_url" 
+					<img class="card-img-top" width="300" height="300" :src="'upload\\' + auction.photo_url" 
 					alt="Auction image" style="border-radius-top: 10px;"></img>
 
 					<div class="card-body">
