@@ -1860,7 +1860,13 @@ __webpack_require__.r(__webpack_exports__);
   props: {
     message: String,
     show: Boolean,
-    type: String
+    type: String,
+    animation: String
+  },
+  methods: {
+    close: function close() {
+      this.$emit('closing');
+    }
   }
 });
 
@@ -1878,6 +1884,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _alertBox_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./alertBox.vue */ "./resources/js/components/alertBox.vue");
+//
+//
+//
 //
 //
 //
@@ -2396,10 +2405,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    alertBox: _alertBox_vue__WEBPACK_IMPORTED_MODULE_0__.default
+    AlertBox: _alertBox_vue__WEBPACK_IMPORTED_MODULE_0__.default
   },
   data: function data() {
     return {
@@ -2434,7 +2447,7 @@ __webpack_require__.r(__webpack_exports__);
             _this.alert.message = response.data.message;
             _this.alert.show = true;
           } else {
-            Vue.toasted.show("Logged in!");
+            Vue.toasted.success("Logged in!");
 
             _this.$store.commit('storeUserToken', response.data.token);
 
@@ -2746,7 +2759,7 @@ __webpack_require__.r(__webpack_exports__);
       this.$store.commit('revokeUser');
       this.$store.commit('revokeUserToken');
       this.$axios.post('/api/logout').then(function (response) {
-        console.log("gotGere");
+        _this.$toasted.show('Logging out...');
 
         _this.$router.go();
       })["catch"](function (error) {
@@ -2826,6 +2839,7 @@ __webpack_require__.r(__webpack_exports__);
     registerUser: function registerUser() {
       var _this = this;
 
+      console.log(this.user);
       this.alert.show = false;
 
       if (this.confPass != this.user.password) {
@@ -2833,7 +2847,8 @@ __webpack_require__.r(__webpack_exports__);
         this.alert.type = "alert alert-danger";
         this.alert.show = true;
       } else {
-        axios.post('api/register', this.user).then(function (response) {
+        this.$toasted.show('Creating your account...');
+        this.$axios.post('api/register', this.user).then(function (response) {
           if (response.data.code != 200) {
             _this.alert.message = response.data.message;
             _this.alert.show = true;
@@ -2844,8 +2859,6 @@ __webpack_require__.r(__webpack_exports__);
           }
         })["catch"](function (error) {
           _this.alert.show = true;
-          _this.alert.message = error.response.data.errors.email[0];
-          console.log(error.response.data.errors.email[0]);
           _this.alert.type = "alert alert-danger";
         });
       }
@@ -21913,24 +21926,28 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _vm.show
-    ? _c("div", { class: _vm.type, attrs: { role: "alert" } }, [
-        _vm._v("\n\t" + _vm._s(_vm.message) + " \n\t"),
-        _c("div", { staticStyle: { float: "right", "margin-top": "-6px" } }, [
-          _c(
-            "button",
-            {
-              staticClass: "btn",
-              attrs: { type: "button" },
-              on: {
-                click: function($event) {
-                  _vm.show = false
+    ? _c(
+        "div",
+        { class: [_vm.type, _vm.animation], attrs: { role: "alert" } },
+        [
+          _vm._v("\n\t" + _vm._s(_vm.message) + " \n\t"),
+          _c("div", { staticStyle: { float: "right", "margin-top": "-6px" } }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.close()
+                  }
                 }
-              }
-            },
-            [_vm._v("X")]
-          )
-        ])
-      ])
+              },
+              [_vm._v("X")]
+            )
+          ])
+        ]
+      )
     : _vm._e()
 }
 var staticRenderFns = []
@@ -22293,7 +22310,9 @@ var render = function() {
             _vm._v(" "),
             _c("div", { staticClass: "col" })
           ])
-        ])
+        ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "container mb-5" })
   ])
 }
 var staticRenderFns = []
@@ -22609,11 +22628,16 @@ var render = function() {
         "div",
         { staticClass: "col-5", staticStyle: { "margin-top": "150px" } },
         [
-          _c("alertBox", {
+          _c("AlertBox", {
             attrs: {
               message: _vm.alert.message,
               type: _vm.alert.type,
               show: _vm.alert.show
+            },
+            on: {
+              closing: function($event) {
+                _vm.alert.show = false
+              }
             }
           }),
           _vm._v(" "),

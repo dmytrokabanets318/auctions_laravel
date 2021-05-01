@@ -41,12 +41,13 @@
 
 			logout(){
 
+
                 this.$store.commit('revokeUser');
                 this.$store.commit('revokeUserToken');
 
                 this.$axios.post('/api/logout')
                 .then(response => {
-                    console.log("gotGere");
+                    this.$toasted.show('Logging out...');
                     this.$router.go();
                 })
                 .catch(error => {
