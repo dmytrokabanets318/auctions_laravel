@@ -93,7 +93,7 @@ class AuctionsController extends Controller{
         $upload_path = public_path('upload');
         if($request->file != null){   
             $file_name = $request->file->getClientOriginalName();
-            $generated_new_name = time() . '.' . $request->file->getClientOriginalExtension();
+            $generated_new_name = time() . '_' . $request->file->getClientOriginalExtension();
         }else{
             return ["message" => "You must insert an image for your auctions", "code" => 400];
         }
