@@ -141,7 +141,6 @@
 		methods: {
 
 			getAuctions(order){
-				console.log(this.$store.state);
 				this.hasSearchedAuctions = true;
 				this.$axios.get('/api/auctions?orderBy='+order)
 				.then(response => {
@@ -160,6 +159,10 @@
 					{headers: {'Authorization' : 'Bearer ' + this.api_token}})
 				.then(response => {
 					
+					if(response.data.code != 200){
+						this.$toasted.error(response.data.message);
+						return;
+					}
 					this.$toasted.success(`Auction ${auction.name} bidded with ${bidPrice}`);
 					auction.bidded = true;
 					if(response.data.code != 200){
