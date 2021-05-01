@@ -4,7 +4,11 @@
             <div class="col"></div>
             <div class="col-5" style="margin-top: 150px;">
 
-                <alertBox :message="alert.message" :type="alert.type" :show="alert.show"></alertBox>
+                <AlertBox @closing="alert.show = false" 
+                    :message="alert.message" 
+                    :type="alert.type" 
+                    :show="alert.show">
+                </AlertBox>
 
                 <form action="#" class="form-group">
                     <h1 class="display-3 text-center">Login</h1>
@@ -31,12 +35,12 @@
 <script>
 
 
-    import alertBox from './alertBox.vue';
+    import AlertBox from './alertBox.vue';
 
     export default {
 
         components: {
-            alertBox,
+            AlertBox,
         },
 
         data(){
@@ -82,7 +86,7 @@
                             this.alert.message = response.data.message;
                             this.alert.show = true;
                         }else{
-                            Vue.toasted.show("Logged in!");
+                            Vue.toasted.success("Logged in!");
                             this.$store.commit('storeUserToken', response.data.token);
                             this.$store.commit('storeUser', this.user.email);
                             this.$router.push('/auctions');
