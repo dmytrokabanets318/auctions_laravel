@@ -1883,7 +1883,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _alertBox_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./alertBox.vue */ "./resources/js/components/alertBox.vue");
 //
 //
 //
@@ -1994,12 +1993,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -2007,11 +2000,6 @@ __webpack_require__.r(__webpack_exports__);
       hasAuctions: false,
       search: "",
       hasSearchedAuctions: true,
-      alert: {
-        message: "",
-        type: "",
-        show: false
-      },
       user: this.$store.getters.getUser,
       api_token: this.$store.getters.getUserToken,
       orderBy: {
@@ -2042,6 +2030,7 @@ __webpack_require__.r(__webpack_exports__);
     getAuctions: function getAuctions(order) {
       var _this = this;
 
+      console.log(this.$store.state);
       this.hasSearchedAuctions = true;
       this.$axios.get('/api/auctions?orderBy=' + order).then(function (response) {
         _this.auctions = response.data;
@@ -2053,7 +2042,6 @@ __webpack_require__.r(__webpack_exports__);
     bidAuction: function bidAuction(auction, bidPrice) {
       var _this2 = this;
 
-      this.alert.show = false;
       var email = this.$store.state.user;
       this.$axios.put('/api/auction/' + auction.id, {
         email: email,
@@ -2063,17 +2051,13 @@ __webpack_require__.r(__webpack_exports__);
           'Authorization': 'Bearer ' + this.api_token
         }
       }).then(function (response) {
-        _this2.alert.message = response.data.message;
+        _this2.$toasted.success("Auction ".concat(auction.name, " bidded with ").concat(bidPrice));
+
         auction.bidded = true;
 
-        if (response.data.code != 200) {
-          _this2.alert.type = "alert alert-danger";
-        } else {
-          _this2.alert.type = "alert alert-success";
+        if (response.data.code != 200) {} else {
           auction.last_bid_price = bidPrice; //this.getAuctions();
         }
-
-        _this2.alert.show = true;
       })["catch"](function (error) {
         console.log(error);
       });
@@ -22209,50 +22193,30 @@ var render = function() {
                                   })
                                 ]),
                             _vm._v(" "),
-                            _c("div", { staticClass: "input-group-append" }, [
-                              _c(
-                                "button",
-                                {
-                                  staticClass: "btn btn-outline-secondary",
-                                  attrs: { type: "button" },
-                                  on: {
-                                    click: function($event) {
-                                      return _vm.bidAuction(
-                                        auction,
-                                        auction.bid_price
-                                      )
-                                    }
-                                  }
+                            _c(
+                              "div",
+                              {
+                                staticClass:
+                                  "input-group-append form-control btn btn-outline-secondary",
+                                staticStyle: {
+                                  display: "flex",
+                                  "justify-content": "center",
+                                  "align-items": "center",
+                                  "border-color": "#a0a4a9"
                                 },
-                                [_vm._v("Bid")]
-                              )
-                            ])
+                                on: {
+                                  click: function($event) {
+                                    return _vm.bidAuction(
+                                      auction,
+                                      auction.bid_price
+                                    )
+                                  }
+                                }
+                              },
+                              [_vm._v("\n\t\t\t\t\t\t\tBid\n\t\t\t\t\t\t\t")]
+                            )
                           ])
-                        : _vm._e(),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        {
-                          directives: [
-                            {
-                              name: "show",
-                              rawName: "v-show",
-                              value: auction.bidded,
-                              expression: "auction.bidded"
-                            }
-                          ]
-                        },
-                        [
-                          _c("alertBox", {
-                            attrs: {
-                              message: _vm.alert.message,
-                              type: _vm.alert.type,
-                              show: _vm.alert.show
-                            }
-                          })
-                        ],
-                        1
-                      )
+                        : _vm._e()
                     ])
                   ]
                 )
