@@ -18,9 +18,7 @@ class UsersController extends Controller{
             'password' => 'required'
         ]);
 
-        if($validator->fails()){
-            $error = $validator->errors()->first();
-        }
+        //TODO check if validator passes
 
         if(count(User::where('email', $request->email)->get()) > 0){
             return ["message" => "Email already registered, please login", "code" => 400];

@@ -39,7 +39,6 @@ class UsersSeeder extends Seeder
     		'email' => $type.$idx.'@mail.com',
     		'password' => bcrypt('123'),
     		'remember_token' => $token,
-            'api_token' => $token,
     		'created_at' => $createdAt,
     		'updated_at' => $faker->dateTimeBetween($createdAt),
     		'deleted_at' => $softDelete ? $faker->dateTimeBetween($createdAt) : null,
