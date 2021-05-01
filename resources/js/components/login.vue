@@ -88,7 +88,9 @@
                         }else{
                             Vue.toasted.success("Logged in!");
                             this.$store.commit('storeUserToken', response.data.token);
+                            console.log(response.data.id);
                             this.$store.commit('storeUser', this.user.email);
+                            this.$store.commit('storeUserId', response.data.id);
                             this.$router.push('/auctions');
                         }
 

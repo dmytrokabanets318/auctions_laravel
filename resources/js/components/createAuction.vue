@@ -127,6 +127,8 @@
 					formData.append('min_price', this.auction.min_price);
 					formData.append('email', this.$store.state.user);
 
+					this.$toasted.show(`Creating auction ${name}`);
+
 					this.$axios.post('api/auction', formData,
 						{headers: {'Authorization' : 'Bearer ' + this.api_token}})
 					.then(response => {

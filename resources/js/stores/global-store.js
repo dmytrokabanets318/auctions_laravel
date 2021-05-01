@@ -9,6 +9,7 @@ export default new Vuex.Store({
 
         token: sessionStorage.getItem('userToken') || localStorage.getItem('userToken') || "",
         user: sessionStorage.getItem('loggedUser') || localStorage.getItem('loggedUser') || "",
+        user_id: sessionStorage.getItem('user_id') || localStorage.getItem('user_id') || "",
 
     },
 
@@ -21,9 +22,11 @@ export default new Vuex.Store({
 
         },
 
-        storeRememberedUser(state, user) {
+        storeRememberedUser(state, user, id) {
             this.user = user;
+            this.user_id = id;
             localStorage.setItem('loggedUser', user);
+            localStorage.setItem('user_id', id);
         },
 
         storeUserToken(state, token){
@@ -31,9 +34,14 @@ export default new Vuex.Store({
             sessionStorage.setItem('userToken', token);
         },
 
-        storeUser(state, user){
+        storeUser(state, user, id){
             this.state.user = user;
             sessionStorage.setItem('loggedUser', user);
+        },
+
+        storeUserId(state, id){
+            this.state.user_id = id;
+            sessionStorage.setItem('user_id', id);
         },
 
         revokeUserToken(state, token) {
@@ -44,6 +52,9 @@ export default new Vuex.Store({
 
         revokeUser(state, user) {
             this.user = " ";
+            this.user_id = "";
+            localStorage.removeItem('user_id');
+            sessionStorage.removeItem('user_id');
             localStorage.removeItem('loggedUser');
             sessionStorage.removeItem('loggedUser');
         },
@@ -58,6 +69,10 @@ export default new Vuex.Store({
 
         getUser(state){
             return state.user;
+        },
+
+        getUserId(state){
+            return state.user_id;
         }
 
     }

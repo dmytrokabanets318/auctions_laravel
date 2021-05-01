@@ -38,6 +38,10 @@ class AuctionsSeeder extends Seeder{
 	private function copyProfilePhoto($filename){
 
 		$upload_path = public_path('upload');
+		if(!file_exists($upload_path)){
+			mkdir($upload_path);
+		}
+		
 		$generated_new_name = time() . '_' . $filename;
 		// $targetDir = storage_path('app\\public\\' . $this->itemsPath);
 
