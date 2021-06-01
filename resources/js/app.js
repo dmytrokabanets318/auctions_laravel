@@ -19,8 +19,6 @@ Vue.use(Toasted, {
 
 });
 
-OLA
-
 import AuctionsComponent from './components/auctions.vue';
 import RegisterComponent from './components/register.vue';
 import AlertBoxComponent from './components/alertBox.vue';
