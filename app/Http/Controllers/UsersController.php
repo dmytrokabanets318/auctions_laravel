@@ -43,7 +43,7 @@ class UsersController extends Controller{
         $credentials = $request->only('email', 'password');
 
         if(Auth::attempt($credentials, $request->remember)){
-            return ["token" => Auth::user()->remember_token, "email" => Auth::user()->email];
+            return ["token" => Auth::user()->remember_token, "email" => Auth::user()->email, "id" => Auth::user()->id];
         }else{
             return ["message" => "Invalid credentials", "code" => 401];
         }

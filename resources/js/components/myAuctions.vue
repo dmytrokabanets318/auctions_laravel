@@ -64,7 +64,7 @@
 				    	<p class="card-text">{{auction.description}}</p>
 				    	<img class="border border-gray border-rounded" 
 				    		style="float: right; position: relative;"
-				    		:src="'storage\\upload\\' + auction.photo_url" 
+				    		:src="'upload\\' + auction.photo_url" 
 				    		alt="Auction image" width="200" height="150">
 				    	
 				    	Start date: {{auction.start}}

@@ -21,9 +21,9 @@
 					<input type="number" class="form-control" required v-model="auction.min_price">
 					<br>
 					<div class="custom-file">
-					    <input type="file" class="custom-file-input" id="customFile" @change="onFileSelected">
-					    <label class="custom-file-label" for="customFile">{{this.fileName}}</label>
-				  	</div>
+						<input type="file" class="custom-file-input" id="customFile" @change="onFileSelected">
+						<label class="custom-file-label" for="customFile">{{this.fileName}}</label>
+					</div>
 					<br>
 					<br>
 					<button type="button" @click.prevent="submit" class="btn btn-success form-control">
@@ -109,11 +109,11 @@
 			},
 
 			sleep(milliseconds) {
-			  	const date = Date.now();
-			  	let currentDate = null;
-			  	do {
-			    	currentDate = Date.now();
-			  	} while (currentDate - date < milliseconds);
+				const date = Date.now();
+				let currentDate = null;
+				do {
+					currentDate = Date.now();
+				} while (currentDate - date < milliseconds);
 			},
 
 			submit(){
@@ -127,7 +127,9 @@
 					formData.append('min_price', this.auction.min_price);
 					formData.append('email', this.$store.state.user);
 
-					axios.post('api/auction', formData,
+					this.$toasted.show(`Creating auction ${name}`);
+
+					this.$axios.post('api/auction', formData,
 						{headers: {'Authorization' : 'Bearer ' + this.api_token}})
 					.then(response => {
 
@@ -164,5 +166,5 @@
 </script>
 
 <style type="text/css" media="screen">
-	
+
 </style>

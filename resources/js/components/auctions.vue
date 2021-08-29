@@ -41,9 +41,9 @@
 			
 			<div class="col-md-4" v-for="auction in auctions">
 				
-				<div class="card mt-5" style="border-radius: 10px;">
+				<div class="card mt-5" :style="styleAuctionBorder(auction)">
 
-					<img class="card-img-top" width="300" height="300" :src="'storage\\upload\\' + auction.photo_url" 
+					<img class="card-img-top" width="300" height="300" :src="'upload\\' + auction.photo_url" 
 					alt="Auction image" style="border-radius-top: 10px;"></img>
 
 					<div class="card-body">
@@ -72,37 +72,37 @@
 
 				</div>
 
-			</div>
-
 		</div>
 
 	</div>
 
-	<div class="container" v-else>
-		<div class="row">
-			<div class="col"></div>
-			<div class="col-8">
+</div>
 
-				<div class="jumbotron" style="margin-top: 250px;">
-					<h1>It appears there are no auctions active...</h1>
-					<!-- TODO later -> use v-if to determine if user is logged in -->
-					<h4 v-if="this.$store.state.user == ''">Login or register to start one!</h4>
-					<div v-else class="text-center"> 
-						<h3>Create one yourself!</h3>
-						<br>
-						<router-link to="create-auction">
-							<button type="button" class="btn btn-primary">Create Auction</button>
-						</router-link>	
-					</div>
-				</div>	
+<div class="container" v-else>
+	<div class="row">
+		<div class="col"></div>
+		<div class="col-8">
 
-			</div>
-			<div class="col"></div>
+			<div class="jumbotron" style="margin-top: 250px;">
+				<h1>It appears there are no auctions active...</h1>
+				<!-- TODO later -> use v-if to determine if user is logged in -->
+				<h4 v-if="this.$store.state.user == ''">Login or register to start one!</h4>
+				<div v-else class="text-center"> 
+					<h3>Create one yourself!</h3>
+					<br>
+					<router-link to="create-auction">
+						<button type="button" class="btn btn-primary">Create Auction</button>
+					</router-link>	
+				</div>
+			</div>	
+
 		</div>
-	</div>	
-
-	<div class="container mb-5">
+		<div class="col"></div>
 	</div>
+</div>	
+
+<div class="container mb-5">
+</div>
 
 </div>
 
@@ -141,7 +141,6 @@
 		methods: {
 
 			getAuctions(order){
-				console.log(this.$store.state);
 				this.hasSearchedAuctions = true;
 				this.$axios.get('/api/auctions?orderBy='+order)
 				.then(response => {
@@ -153,6 +152,17 @@
 				});
 			},
 
+			styleAuctionBorder(auction){
+				let style = 'border-radius: 10px;';
+				if(auction.last_bid_user_id == this.$store.state.user_id){
+					style += ' border-color: green; border-width: 5px;';
+				}
+				if(auction.owner_id == this.$store.state.user_id){
+					style += 'border-color: blue; border-width: 5px';
+				}
+				return style;
+			},
+
 			bidAuction(auction, bidPrice){
 				
 				let email = this.$store.state.user;
@@ -160,6 +170,12 @@
 					{headers: {'Authorization' : 'Bearer ' + this.api_token}})
 				.then(response => {
 					
+					if(response.data.code != 200){
+						this.$toasted.error(response.data.message);
+						return;
+					}
+
+					auction.last_bid_user_id = this.$store.state.user_id;
 					this.$toasted.success(`Auction ${auction.name} bidded with ${bidPrice}`);
 					auction.bidded = true;
 					if(response.data.code != 200){
@@ -246,4 +262,19 @@ input::-webkit-inner-spin-button {
 input[type=number] {
 	-moz-appearance:textfield; /* Firefox */
 }
+
+.biddedAuction {
+
+	border-radius: 10px;
+	border-width: 5px;
+	border-color: green;
+
+}
+
+.unbiddedAuction {
+
+	border-radius: 10px;
+
+}
+
 </style>
