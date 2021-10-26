@@ -7,9 +7,9 @@ export default new Vuex.Store({
 
     state: {
 
-        token: sessionStorage.getItem('userToken') || localStorage.getItem('userToken') || "",
-        user: sessionStorage.getItem('loggedUser') || localStorage.getItem('loggedUser') || "",
-        user_id: sessionStorage.getItem('user_id') || localStorage.getItem('user_id') || "",
+        token: sessionStorage.getItem('userToken') || localStorage.getItem('userToken') || null,
+        user: JSON.parse(sessionStorage.getItem('loggedUser')) || JSON.parse(localStorage.getItem('loggedUser')) || null,
+        user_id: sessionStorage.getItem('user_id') || localStorage.getItem('user_id') || null,
 
     },
 
@@ -36,7 +36,8 @@ export default new Vuex.Store({
 
         storeUser(state, user, id){
             this.state.user = user;
-            sessionStorage.setItem('loggedUser', user);
+            let jsonUser = JSON.stringify(user);
+            sessionStorage.setItem('loggedUser', jsonUser);
         },
 
         storeUserId(state, id){

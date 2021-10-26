@@ -4,12 +4,6 @@
       <div class="col"></div>
       <div class="col-5" style="margin-top: 150px;">
 
-        <AlertBox @closing="alert.show = false" 
-        :message="alert.message" 
-        :type="alert.type" 
-        :show="alert.show">
-        </AlertBox>
-
         <form action="#" class="form-group">
           <h1 class="display-3 text-center">Login</h1>
           <label for="email">Email</label>
@@ -19,6 +13,12 @@
           <br>
           <button class="btn btn-success form-control" @click.prevent="login">Login</button>
           <br>
+          <AlertBox class="mt-3"
+            :message="alert.message" 
+            :type="alert.type" 
+            :show="alert.show"
+            @close="alert.show = false">
+          </AlertBox>
           <p class="text-center mt-4">
             <router-link to="forgotPassword">
               <a href="#" title="ForgotPass"><h5>Forgot Password?</h5></a>
@@ -85,8 +85,7 @@
             }else{
               Vue.toasted.success("Logged in!");
               this.$store.commit('storeUserToken', response.data.token);
-              console.log(response.data.id);
-              this.$store.commit('storeUser', this.user.email);
+              this.$store.commit('storeUser', response.data.user);
               this.$store.commit('storeUserId', response.data.id);
               this.$router.push('/auctions');
             }
