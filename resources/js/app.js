@@ -1,14 +1,21 @@
 import 'bootstrap'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import axios from 'axios';
-Vue.prototype.$axios = axios;
-
 import Vue from 'vue';
 window.Vue = Vue;
 
+import axios from 'axios';
+Vue.prototype.$axios = axios;
+
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
+
+import VueSocketIO from 'vue-socket.io'
+Vue.use(new VueSocketIO({
+    debug: true,
+    connection: 'http://localhost:8080',
+    withCredentials: true,
+}));
 
 import Toasted from 'vue-toasted';
 Vue.use(Toasted, {
@@ -52,6 +59,16 @@ const routes = [
 
 const router = new VueRouter({
     routes: routes,
+});
+
+router.beforeEach((to, from, next) => {
+    if (to.name == "logout") {
+        if (!store.state.user) {
+            next("/login");
+            return;
+        }
+    }
+    next();
 });
 
 import store from './stores/global-store';
