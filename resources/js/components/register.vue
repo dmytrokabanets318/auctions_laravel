@@ -7,7 +7,7 @@
 				<div class="form-group align-midle" style="margin-top: 100px;">
           <h2 class="h2 text-center">Register</h2>
 
-					<form class="form-group">
+					<form action="#" class="form-group">
 						<label for="name">Name</label>
 						<input class="form-control" type="text" v-model="user.name" required>
 						<label for="Email">Email</label>
@@ -30,11 +30,10 @@
 </template>
 
 <script type="text/javascript">
-import alertBox from "./alertBox.vue";
 
 export default {
   components: {
-    alertBox,
+    AlertBox: () => import("./utils/alertBox.vue"),
   },
 
   data() {
