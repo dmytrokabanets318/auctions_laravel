@@ -21,21 +21,21 @@ Vue.use(Toasted, {
 
 import AuctionsComponent from './components/auctions.vue';
 import RegisterComponent from './components/register.vue';
-import AlertBoxComponent from './components/alertBox.vue';
 import LoginComponent from './components/login.vue';
 import CreateAuctionComponent from './components/createAuction.vue';
 import MyAuctionsComponent from './components/myAuctions.vue';
 import NavBarComponent from './components/navbar.vue';
 import ForgotPasswordComponent from './components/forgotPassword.vue';
+import WalletComponent from './components/wallet.vue';
 
 const auctions = Vue.component("auctions", AuctionsComponent);
 const register = Vue.component("register", RegisterComponent);
-const alertBox = Vue.component("alertBox", AlertBoxComponent);
 const login = Vue.component("login", LoginComponent);
 const createAuction = Vue.component("create-auction", CreateAuctionComponent);
 const myAuctions = Vue.component("myAuctions", MyAuctionsComponent);
 const navbar = Vue.component("navbar", NavBarComponent);
 const forgotPassword = Vue.component("forgotPassowrd", ForgotPasswordComponent);
+const wallet = Vue.component("wallet", WalletComponent);
 
 const routes = [
 
@@ -46,6 +46,7 @@ const routes = [
     { path: '/create-auction', component: createAuction},
     { path: '/my-auctions', component: myAuctions},
     { path: '/forgotPassword', component: forgotPassword},
+    { path: '/wallet', component: WalletComponent}
 
 ];
 

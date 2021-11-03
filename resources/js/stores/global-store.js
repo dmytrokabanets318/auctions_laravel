@@ -9,6 +9,7 @@ export default new Vuex.Store({
 
         token: sessionStorage.getItem('userToken') || localStorage.getItem('userToken') || null,
         user: JSON.parse(sessionStorage.getItem('loggedUser')) || JSON.parse(localStorage.getItem('loggedUser')) || null,
+        wallet: JSON.parse(sessionStorage.getItem('wallet')) || JSON.parse(localStorage.getItem('wallet')) || null,
         user_id: sessionStorage.getItem('user_id') || localStorage.getItem('user_id') || null,
 
     },
@@ -45,20 +46,40 @@ export default new Vuex.Store({
             sessionStorage.setItem('user_id', id);
         },
 
+        storeWallet(state, wallet){
+            this.state.wallet = wallet;
+            let jsonWallet = JSON.stringify(wallet);
+            localStorage.setItem('wallet', jsonWallet);
+            sessionStorage.setItem('wallet', jsonWallet);
+        },
+
         revokeUserToken(state, token) {
-            this.token = " ";
+            this.state.token = " ";
             localStorage.removeItem('userToken');
             sessionStorage.removeItem('userToken');
         },
 
         revokeUser(state, user) {
-            this.user = " ";
-            this.user_id = "";
+            this.state.user = "";
+            this.state.user_id = "";
             localStorage.removeItem('user_id');
             sessionStorage.removeItem('user_id');
             localStorage.removeItem('loggedUser');
             sessionStorage.removeItem('loggedUser');
         },
+
+        revokeWallet(state, wallet){
+            this.state.wallet = '';
+            localStorage.removeItem('wallet');
+            sessionStorage.removeItem('wallet');
+        },
+
+        setBalance(state, balance){
+            this.state.wallet.balance = balance;
+            let jsonWallet = JSON.stringify(this.state.wallet);
+            localStorage.setItem('wallet', jsonWallet);
+            sessionStorage.setItem('wallet', jsonWallet);
+        }
 
     },
 
@@ -74,6 +95,12 @@ export default new Vuex.Store({
 
         getUserId(state){
             return state.user_id;
+        },
+
+        getWallet(state){
+            console.log('this', this);
+            console.log('state', state);
+            return state.wallet;
         }
 
     }
