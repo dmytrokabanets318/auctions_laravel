@@ -92,9 +92,9 @@ export default {
         .then((response) => {
 
           Vue.toasted.success("Logged in!");
-
           const user = response.data.user;
 
+          this.$socket.emit("user_enter", user);
           this.$store.commit("storeUserToken", response.data.api_token);
           this.$store.commit("storeUser", user);
           this.$store.commit("storeUserId", user.id);

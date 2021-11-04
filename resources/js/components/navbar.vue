@@ -73,6 +73,7 @@ export default {
         .post("/api/logout")
         .then((response) => {
           this.$toasted.show("Logging out...");
+          this.$socket.emit("user_exit", this.auth);
           this.$router.go();
         })
         .catch((error) => {
