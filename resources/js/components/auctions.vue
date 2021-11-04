@@ -83,8 +83,7 @@
                 <p
                   v-if="
                     auction.last_bid_price != null ||
-                    auction.last_bid_price != 0
-                  "
+                    auction.last_bid_price != 0"
                 >
                   Last bid price: {{ auction.last_bid_price }}€
                 </p>
@@ -95,10 +94,7 @@
                       type="text"
                       class="form-control"
                       v-model="auction.bid_price"
-                      :placeholder="
-                        'Bid price: ' + auction.last_bid_price + '€'
-                      "
-                    />
+                      :placeholder="'Bid price: ' + auction.last_bid_price + '€'"/>
                   </div>
                   <div v-else>
                     <input
@@ -197,6 +193,31 @@ export default {
     }),
   },
 
+  sockets: {
+
+    auction_bidded(data){
+      
+      if(data.message){
+        Vue.toasted.show(data.message);
+      }
+
+      if(data.auction){
+
+        console.log("Socket auction", data.auction);
+        this.auctions.find((auction) => {
+          if(auction.id === data.auction.id){
+            console.log("Found auction -> ", auction);
+            auction.last_bid_user_id = data.auction.last_bid_user_id;
+            auction.last_bid_price = data.auction.last_bid_price;
+          }
+        });
+        console.log("All auctions", this.auctions);
+ 
+      }
+    }
+
+  },
+
   methods: {
     async getAuctions(order) {
       this.hasSearchedAuctions = true;
@@ -238,6 +259,8 @@ export default {
         url: `/api/auction/${auction.id}`
       };
 
+      const last_user_id = auction.last_bid_user_id;
+
       this.$axios(options).then((response) => {
 
           if (response.status != 200) {
@@ -250,6 +273,8 @@ export default {
 
           this.$toasted.success(`Auction ${auction.name} bidded with ${bidPrice}`);
           auction.bidded = true;
+
+          this.$socket.emit('auction_bidded', auction, last_user_id);
           
         }).catch((error) => {
           console.log(error);
