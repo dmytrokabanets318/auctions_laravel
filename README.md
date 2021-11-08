@@ -20,9 +20,11 @@ This application also uses **Socket.io** for real time changes in auctions.
  - - php artisan migrate:fresh --seed
  - - php artisan serve
  - - npm run watch
+ - - node WebSocketServer/server.js
  
  - Use:
- - - Login with 'user0@mail.com' password '123' or register a new account
+ - - Login with any user from user0 to user5 -> "'user0'@mail.com" and password "123" or register a new account
+ - - Increase balance
  - - Open another tab to visualize real time data exchange
 
 ## Future features
