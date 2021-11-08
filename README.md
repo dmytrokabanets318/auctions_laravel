@@ -14,6 +14,19 @@ To bid an auction, the user must have a wallet balance equal or greater that the
 When the owner of a bidded auction closes it's auction, the value of this auction is transfered from the reserved space of a user to it's owner. 
 This application also uses **Socket.io** for real time changes in auctions.
 
+## How to
+
+ - Deploy:
+ - - php artisan migrate:fresh --seed
+ - - php artisan serve
+ - - npm run watch
+ - - node WebSocketServer/server.js
+ 
+ - Use:
+ - - Login with any user from user0 to user5 -> "'user0'@mail.com" and password "123" or register a new account
+ - - Increase balance
+ - - Open another tab to visualize real time data exchange
+
 ## Future features
 
  - Email integration for account confirmation and others.
