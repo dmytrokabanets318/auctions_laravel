@@ -1,170 +1,189 @@
 <template>
-	
 	<div class="container">
 		<div class="row">
 			<div class="col"></div>
 			<div class="col-6">
-				
-				<form class="form-group" style="padding-top: 120px;" enctype="multipart/form-data">
-					
-					<alertBox :message="this.alert.message" :show="this.alert.show" :type="this.alert.type">
-						
-					</alertBox>	
+
+				<form class="form-group" style="padding-top: 120px" enctype="multipart/form-data">
 
 					<h2 class="display-4 text-center">Create an Auction</h2>
 
 					<label for="name">Name</label>
-					<input type="text" class="form-control" required v-model="auction.name">
+					<input
+						type="text"
+						class="form-control"
+						required
+						v-model="auction.name"
+					/>
+
 					<label for="description">Description</label>
-					<textarea type="text" class="form-control" rows="4" cols="40" required v-model="auction.description"></textarea>
+					<textarea
+						type="text"
+						class="form-control"
+						rows="4"
+						cols="40"
+						required
+						v-model="auction.description"
+					></textarea>
+
 					<label for="min_price">Minimum Price</label>
-					<input type="number" class="form-control" required v-model="auction.min_price">
-					<br>
-					<div class="custom-file">
-						<input type="file" class="custom-file-input" id="customFile" @change="onFileSelected">
-						<label class="custom-file-label" for="customFile">{{this.fileName}}</label>
+					<input
+						type="number"
+						class="form-control"
+						required
+						v-model="auction.min_price"
+					/>
+
+					<div class="custom-file mt-3 mb-3">
+
+						<input
+							type="file"
+							class="custom-file-input"
+							id="customFile"
+							@change="onFileSelected"
+						/>
+						<label class="custom-file-label"	for="customFile">
+							{{this.fileName}}
+						</label>
+
 					</div>
-					<br>
-					<br>
-					<button type="button" @click.prevent="submit" class="btn btn-success form-control">
+
+					<button type="button" @click.prevent="submit(auction)" class="btn btn-success form-control">
 						Submit
 					</button>
 
 				</form>
-
+				<alertBox
+					:message="alert.message"
+					:show="alert.show"
+					:type="alert.type"
+					:errors="errors"
+					@close="alert.show = false"
+				>
+				</alertBox>
 			</div>
 			<div class="col"></div>
 		</div>
 	</div>
-
 </template>
 
 <script type="text/javascript">
-	
-	import alertBox from './alertBox.vue';
 
-	export default {
+import { mapGetters } from 'vuex';
 
-		components: {alertBox},
+export default {
+	components: {
+		AlertBox: () => import("./utils/alertBox.vue"),
+	},
 
-		data() {
+	data() {
+		return {
+			fileName: "Choose item's photo",
 
-			return {
+			auction: {
+				name: "",
+				description: "",
+				min_price: 0,
+				photo_url: null,
+			},
 
-				fileName : "Choose item's photo",
+			errors: [],
 
-				auction : {
+			alert: {
+				message: "",
+				show: false,
+				type: "alert alert-danger",
+			},
 
-					name: "",
-					description: "",
-					min_price: 0,
-					photo_url: null,
+		};
+	},
 
-				},
+	computed: {
+		...mapGetters({
+			api_token: 'getUserToken',
+			user: 'getUser',
+		})
+	},
 
-				alert: {
-					message: "",
-					show: false,
-					type: '',
-				},
+	methods: {
+		onFileSelected(event) {
+			this.fileName = event.target.files[0].name;
+			this.auction.photo_url = event.target.files[0];
+		},
 
-				api_token: this.$store.getters.getUserToken,
+		checkForm(auction) {
 
+			this.errors = [];
+			this.alert.show = false;
+
+			if (!auction.name) {
+				this.errors.push("You must insert the name of your auction");
 			}
+
+			if (!auction.description) {
+				this.errors.push("You must insert the description of your auction")
+			}
+
+			if (!auction.min_price || auction.min_price <= 0) {
+				this.errors.push("You must insert the minimum price of your auction")
+			}
+
+			if (!auction.photo_url || !auction.photo_url) {
+				this.errors.push("You must insert an image for your photo")
+			}
+
+			if (this.errors.length) {
+				this.alert.show = true;
+				return false;
+			}
+
+			return true;
 
 		},
 
-		methods: {
+		// sleep(milliseconds) {
+		// 	const date = Date.now();
+		// 	let currentDate = null;
+		// 	do {
+		// 		currentDate = Date.now();
+		// 	} while (currentDate - date < milliseconds);
+		// },
 
-			onFileSelected(event){
-				this.fileName = event.target.files[0].name;
-				this.auction.photo_url = event.target.files[0];
-			},
+		submit(auction) {
 
-			checkForm(){
+			if (this.checkForm(auction)) {
 
-				this.auction.show = false;
+				let formData = new FormData();
+				formData.append("file", auction.photo_url);
+				formData.append("name", auction.name);
+				formData.append("description", auction.description);
+				formData.append("min_price", auction.min_price);
+				formData.append("email", this.user.email);
 
-				if(this.auction.name == ""){
-					this.alert.message = "You must insert the name of your auction";
-					return false;
-				}
+				this.$toasted.show(`Creating auction ${auction.name}`);
 
-				if(this.auction.description == ""){
-					this.alert.message = "You must insert the description of your auction";
-					return false;
-				}
-
-				if(this.auction.min_price == ""){
-					this.alert.message = "You must insert the minimum price of your auction";
-					return false;
-				}
-
-				if(this.auction.photo_url == "" || this.auction.photo_url == null){
-					this.alert.message = "You must insert an image for your photo";
-				}
-
-				return true;
-
-			},
-
-			sleep(milliseconds) {
-				const date = Date.now();
-				let currentDate = null;
-				do {
-					currentDate = Date.now();
-				} while (currentDate - date < milliseconds);
-			},
-
-			submit(){
-
-				if(this.checkForm()){
-
-					let formData = new FormData();
-					formData.append('file', this.auction.photo_url);
-					formData.append('name', this.auction.name);
-					formData.append('description', this.auction.description);
-					formData.append('min_price', this.auction.min_price);
-					formData.append('email', this.$store.state.user);
-
-					this.$toasted.show(`Creating auction ${name}`);
-
-					this.$axios.post('api/auction', formData,
-						{headers: {'Authorization' : 'Bearer ' + this.api_token}})
-					.then(response => {
-
-						if(response.data.code == 400){
+				this.$axios
+					.post("api/auction", formData, {
+						headers: { Authorization: "Bearer " + this.api_token },
+					})
+					.then((response) => {
+						if (response.status == 400) {
 							this.alert.message = response.data.message;
 							this.alert.type = "alert alert-danger";
 							this.alert.show = true;
-						}else{
-							this.alert.message = response.data.message;
-							this.alert.type = "alert alert-success";
-							this.alert.show = true;
-							Vue.toasted.show('Auction ' + this.auction.name + ' created!');
-							console.log(response.data.message);
-							this.sleep(2000);
-							this.$router.push('/my-auctions')
+						} else {
+							Vue.toasted.success(response.data.message);
+							this.$router.push("/my-auctions");
 						}
-
 					})
-					.catch(error => {
-						console.log(error);						
+					.catch((error) => {
+						console.log(error);
 					});
-
-				}
-
-				
-
-
 			}
-
-		}
-
-	}
-
+		},
+	},
+};
 </script>
 
 <style type="text/css" media="screen">
-
 </style>
