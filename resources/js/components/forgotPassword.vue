@@ -29,7 +29,7 @@
 
 <script type="text/javascript">
 
-	import alertBox from './alertBox.vue';
+	import alertBox from './utils/alertBox.vue';
 	
 	export default {
 

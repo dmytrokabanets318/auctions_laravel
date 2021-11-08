@@ -1,3 +1,38 @@
+![Auction's logo](https://i.imgur.com/kbH0ofx.png)
+
+# Auctions Web Page
+
+This is a Web Application developed with the porpuse of buying and selling items trough online auctions.
+It was created solely as practise, having no real world use.
+It was made with **Laravel** and **Vue.js** frameworks, as well as **Bootstrap** for CSS.
+
+# Features
+
+This aplication allows users to register and login with their accounts.
+Every user, authenticated or not, can visualize all available auctions, but only authenticated users can bid those auctions, as well as create new ones.
+To bid an auction, the user must have a wallet balance equal or greater that the auctions price. Then, the bidded price is reserved in the user's wallet, and this money can no longer be used to bid other auctions unless other user bids the same auction with a greater value. 
+When the owner of a bidded auction closes it's auction, the value of this auction is transfered from the reserved space of a user to it's owner. 
+This application also uses **Socket.io** for real time changes in auctions.
+
+## Future features
+
+ - Email integration for account confirmation and others.
+ - Debit, Credit and Paypal deposit
+ - ...
+
+## Used packages
+In backend: 
+ - Laravel Wallet
+
+In frontend: 
+
+ - Axios
+ - Bootstrap
+ - Socket.io
+ - Vue-toasted
+ - Vuex
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">
