@@ -32,6 +32,8 @@ In frontend:
  - Vue-toasted
  - Vuex
 
+![Auctions Preview](https://i.imgur.com/ulMP0so.png)
+
 ------------
 
 
