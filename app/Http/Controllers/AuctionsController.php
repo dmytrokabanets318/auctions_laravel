@@ -5,15 +5,14 @@ namespace App\Http\Controllers;
 use App\Auction;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Http\Controllers\UserWalletController;
+use Bavix\Wallet\Models\Wallet;
 
-class AuctionsController extends Controller
-{
+class AuctionsController extends Controller {
 
-	public function index(Request $request)
-	{
+	public function index(Request $request) {
 
 		if ($request->orderBy == 'undefined') {
 			$request->orderBy = 'start desc';
@@ -25,7 +24,6 @@ class AuctionsController extends Controller
 			->orWhere('end', 0)
 			->orderBy($order[0], $order[1])
 			->get();
-
 
 		if ($order[0] == 'last_bid_price') {
 
@@ -48,8 +46,7 @@ class AuctionsController extends Controller
 		return $auctions;
 	}
 
-	public function searchAuction(Request $request)
-	{
+	public function searchAuction(Request $request) {
 
 		if ($request->orderBy == 'undefined') {
 			$request->orderBy = 'start desc';
@@ -86,8 +83,7 @@ class AuctionsController extends Controller
 		return $auctions;
 	}
 
-	public function store(Request $request)
-	{
+	public function store(Request $request) {
 
 		$upload_path = public_path('upload');
 		if ($request->file != null) {
@@ -107,29 +103,22 @@ class AuctionsController extends Controller
 		]);
 
 		$auction = new Auction();
-
-		$user = User::where('email', $request->email)->first();
+		$user = Auth::user();
 
 		$auction->owner_id = $user->id;
-
 		$auction->name = $request->name;
 		$auction->description = $request->description;
 		$auction->min_price = $request->min_price;
-
 		$request->file->move($upload_path, $generated_new_name);
-
 		$auction->photo_url = $generated_new_name;
-
 		$auction->start = Carbon::now();
 
 		$auction->save();
 
-		return response()->json(['message' => 'You have successfully created the auction "'
-			. $auction->name . '"']);
+		return response()->json(['message' => "You have successfully created the auction " . $auction->name]);
 	}
 
-	public function userAuctions(Request $request)
-	{
+	public function userAuctions(Request $request) {
 
 		$user = Auth::user();
 		$close = true;
@@ -184,8 +173,7 @@ class AuctionsController extends Controller
 		}
 	}
 
-	public function bidAuction(Request $request)
-	{
+	public function bidAuction(Request $request) {
 
 		$auction = Auction::find($request->id);
 		$user = Auth::user();
@@ -209,17 +197,40 @@ class AuctionsController extends Controller
 			return response()->json(["message" => "You dont have enough funds to bid this auction"], 206);
 		}
 
+		if($auction->last_bid_user_id != null){
+			$last_user = User::find($auction->last_bid_user_id);
+			$last_user_wallet = UserWalletController::getUserWallet($last_user->id);
+
+			$last_user_wallet = Wallet::where('holder_id', $auction->last_bid_user_id)->first();
+			$last_user_wallet->reserved -= $auction->last_bid_price;
+			$last_user_wallet->balance += $auction->last_bid_price;
+			$last_user_wallet->save();
+		}
+
 		$auction->last_bid_price = $request->bidPrice;
 		$auction->last_bid_user_id = $user->id;
 
+		$user_wallet = UserWalletController::getUserWallet($user->id);
+
+		$reserved = $user_wallet->reserved = $user_wallet->reserved + $request->bidPrice;
+		error_log(print_r($user_wallet, TRUE)); 
+		$newBalance = $user_wallet->balance = $user_wallet->balance - $request->bidPrice;
+		error_log(print_r($user_wallet, TRUE)); 
+
+		$user_wallet->save();
+		error_log(print_r($user_wallet, TRUE)); 
 
 		$auction->save();
 
-		return response()->json(["message" => "Auction " . $auction->name . " bidded with " . $request->bidPrice . " €", "balance" => $balance]);
+		return response()->json([
+			"message" => "Auction " . $auction->name . " bidded with " . $request->bidPrice . " €", 
+			"balance" => $newBalance, 
+			"reserved" => $reserved
+		]);
+
 	}
 
-	public function closeAuction(Request $request)
-	{
+	public function closeAuction(Request $request) {
 
 		$auction = Auction::findOrFail($request->id);
 
@@ -228,19 +239,34 @@ class AuctionsController extends Controller
 		}
 
 		$owner = Auth::user();
-
 		if ($auction->owner_id == $owner->id) {
 			$auction->end = Carbon::now();
 		} else {
 			return response()->json(["message" => "You cant close this auction"], 203);
 		}
 
-		$transfer = (object) ['auction' => $auction];
-		$walletController = new UserWalletController();
-		$balance = $walletController->transfer($transfer);
+		$owner_wallet = Wallet::where('holder_id', $owner->id)->first();
+		$user_wallet = Wallet::where('holder_id', $auction->last_bid_user_id)->first();
+
+		if($user_wallet->reserved >= $auction->last_bid_price){
+
+			$payment = $auction->last_bid_price;
+			$user_wallet->reserved -= $payment;
+			$user_wallet->balance += $payment;
+
+			$user_wallet->transfer($owner_wallet, $payment);
+
+			// $transfer = (object) ['auction' => $auction];
+			// $walletController = new UserWalletController();
+			// $balance = $walletController->transfer($transfer);
+
+		}else{
+			return response()->json(["message" => "Unknown error ocured, try again later"], 500);
+		}
 
 		$auction->save();
 
-		return response()->json(["message" => "Auction ended", "balance" => $balance]);
+		return response()->json(["message" => "Auction ended", "balance" => $owner_wallet->balance]);
+
 	}
 }
