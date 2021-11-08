@@ -1,6 +1,7 @@
 <template>
   <div class="container jumbotron mt-lg-5">
     <h3>Current balance: {{wallet.balance}}€</h3>
+    <h5>Reserved balance: {{wallet.reserved}}€</h5>
 
     <div class="mt-5">
 
@@ -60,7 +61,7 @@ export default {
         }).then(response => {
           Vue.toasted.success(`Successfully deposited ${ammount}`);
           this.wallet.balance = response.data;
-          this.$store.commit('setBalance', this.wallet.balance);
+          this.$store.commit('setBalance', {balance: this.wallet.balance});
         }).catch(error => {
           console.log(error);
           Vue.toasted.error('There was an error depositing the deposit ammount');

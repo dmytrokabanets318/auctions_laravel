@@ -15,16 +15,20 @@ class UserWalletController extends Controller{
         return User::where('email', $email)->first();
     }
 
+    public static function getUserWallet($user_id){
+        return ModelsWallet::where('holder_id', $user_id)->first();
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function getBalance(Request $request){
-        // $user = $this->getUser($request->email);
-        // $user->wallet->refreshBalance();
         $user = Auth::user();
-        return $user->balance;
+        $wallet = $this->getUserWallet($user->id);
+
+        return response()->json(["balance" => $wallet->balance, "reserved" => $wallet->reserved]);
     }
 
     public function deposit(Request $request){
