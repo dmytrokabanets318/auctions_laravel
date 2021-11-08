@@ -74,8 +74,12 @@ export default new Vuex.Store({
             sessionStorage.removeItem('wallet');
         },
 
-        setBalance(state, balance){
-            this.state.wallet.balance = balance;
+        setBalance(state, wallet){
+            console.log("Store wallet", wallet);
+            this.state.wallet.balance = wallet.balance;
+            if(wallet.reserved){
+                this.state.wallet.reserved = wallet.reserved;
+            }
             let jsonWallet = JSON.stringify(this.state.wallet);
             localStorage.setItem('wallet', jsonWallet);
             sessionStorage.setItem('wallet', jsonWallet);

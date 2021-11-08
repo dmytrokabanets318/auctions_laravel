@@ -30,6 +30,7 @@ class CreateWalletsTable extends Migration
             $table->string('slug')->index();
             $table->string('description')->nullable();
             $table->decimal('balance', 64, 0)->default(0);
+            $table->decimal('reserved', 64, 0)->default(0);
             $table->timestamps();
 
             $table->unique(['holder_type', 'holder_id', 'slug']);
