@@ -31,3 +31,7 @@ Route::middleware('auth:api')->put('/auction/{id}/close', 'AuctionsController@cl
 Route::middleware('auth:api')->post('/auction', 'AuctionsController@store');
 Route::middleware('auth:api')->get('/auctions/{email}', 'AuctionsController@userAuctions');
 
+Route::middleware('auth:api')->get('/wallet', 'UserWalletController@getBalance');
+Route::middleware('auth:api')->put('/wallet/deposit', 'UserWalletController@deposit');
+Route::middleware('auth:api')->put('/wallet/withdraw', 'UserWalletController@withdraw');
+Route::middleware('auth:api')->put('/wallet/transfer', 'UserWalletController@transfer');

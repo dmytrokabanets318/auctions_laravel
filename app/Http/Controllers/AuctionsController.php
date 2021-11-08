@@ -7,235 +7,240 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Auth;
 use App\User;
+use App\Http\Controllers\UserWalletController;
 
-class AuctionsController extends Controller{
+class AuctionsController extends Controller
+{
 
-    public function index(Request $request){
+	public function index(Request $request)
+	{
 
-        if($request->orderBy == 'undefined'){
-            $request->orderBy = 'start desc';
-        }
+		if ($request->orderBy == 'undefined') {
+			$request->orderBy = 'start desc';
+		}
 
-        $order = explode(" ", $request->orderBy);
+		$order = explode(" ", $request->orderBy);
 
-        $auctions = Auction::where('end', null)
-            ->orWhere('end', 0)
-            ->orderBy($order[0], $order[1])
-            ->get();
+		$auctions = Auction::where('end', null)
+			->orWhere('end', 0)
+			->orderBy($order[0], $order[1])
+			->get();
 
 
-        if($order[0] == 'last_bid_price'){
+		if ($order[0] == 'last_bid_price') {
 
-            foreach ($auctions as $auction) {
+			foreach ($auctions as $auction) {
 
-                if($auction->last_bid_price == 0 || $auction->last_bid_price == null){
-                    $auction['orderByPrice'] = $auction->min_price;
-                }else{
-                    $auction['orderByPrice'] = $auction->last_bid_price;
-                }
+				if ($auction->last_bid_price == 0 || $auction->last_bid_price == null) {
+					$auction['orderByPrice'] = $auction->min_price;
+				} else {
+					$auction['orderByPrice'] = $auction->last_bid_price;
+				}
+			}
 
-            }
+			if ($order[1] == 'asc') {
+				return $auctions->sortBy('orderByPrice')->values()->all();
+			} else {
+				return $auctions->sortByDesc('orderByPrice')->values()->all();
+			}
+		}
 
-            if($order[1] == 'asc'){
-                return $auctions->sortBy('orderByPrice')->values()->all();
-            }else{
-                return $auctions->sortByDesc('orderByPrice')->values()->all();
-            }
+		return $auctions;
+	}
 
-        }
+	public function searchAuction(Request $request)
+	{
 
-        return $auctions;
+		if ($request->orderBy == 'undefined') {
+			$request->orderBy = 'start desc';
+		}
 
-    }
+		$order = explode(" ", $request->orderBy);
 
-    public function searchAuction(Request $request){
+		$auctions = Auction::where('name', 'LIKE', '%' . $request->search . '%')
+			->orderBy($order[0], $order[1])
+			->get();
 
-        if($request->orderBy == 'undefined'){
-            $request->orderBy = 'start desc';
-        }
+		if ($order[0] == 'last_bid_price') {
 
-        $order = explode(" ", $request->orderBy);
+			foreach ($auctions as $auction) {
 
-        $auctions = Auction::where('name', 'LIKE', '%'.$request->search.'%')
-            ->orderBy($order[0], $order[1])
-            ->get();
+				if ($auction->last_bid_price == 0 || $auction->last_bid_price == null) {
+					$auction['orderByPrice'] = $auction->min_price;
+				} else {
+					$auction['orderByPrice'] = $auction->last_bid_price;
+				}
+			}
 
-        if($order[0] == 'last_bid_price'){
+			if ($order[1] == 'asc') {
+				return $auctions->sortBy('orderByPrice')->values()->all();
+			} else {
+				return $auctions->sortByDesc('orderByPrice')->values()->all();
+			}
+		}
 
-            foreach ($auctions as $auction) {
+		if (count($auctions) == 0) {
+			return response()->json(["message" => "There are no auctions available with that name"], 206);
+		}
 
-                if($auction->last_bid_price == 0 || $auction->last_bid_price == null){
-                    $auction['orderByPrice'] = $auction->min_price;
-                }else{
-                    $auction['orderByPrice'] = $auction->last_bid_price;
-                }
+		return $auctions;
+	}
 
-            }
+	public function store(Request $request)
+	{
 
-            if($order[1] == 'asc'){
-                return $auctions->sortBy('orderByPrice')->values()->all();
-            }else{
-                return $auctions->sortByDesc('orderByPrice')->values()->all();
-            }
-          
-        }
+		$upload_path = public_path('upload');
+		if ($request->file != null) {
+			$file_name = $request->file->getClientOriginalName();
+			$generated_new_name = time() . '_' . $request->file->getClientOriginalExtension();
+		} else {
+			return response()->json(["message" => "You must insert an image for your auctions"], 400);
+		}
 
-        if(count($auctions) == 0){
-            return ["message" => "There are no auctions available with that name", "code" => 206];
-        }
+		$validator = $request->validate([
 
-        return $auctions;
+			'name' => 'required',
+			'description' => 'required',
+			'min_price' => 'required|digits_between:1,10000',
+			'file' => 'required|file|image',
 
-    }
+		]);
 
-    public function store(Request $request){
+		$auction = new Auction();
 
-        $upload_path = public_path('upload');
-        if($request->file != null){   
-            $file_name = $request->file->getClientOriginalName();
-            $generated_new_name = time() . '_' . $request->file->getClientOriginalExtension();
-        }else{
-            return ["message" => "You must insert an image for your auctions", "code" => 400];
-        }
+		$user = User::where('email', $request->email)->first();
 
-        $validator = $request->validate([
+		$auction->owner_id = $user->id;
 
-            'name' => 'required',
-            'description' => 'required',
-            'min_price' => 'required|digits_between:1,10000',
-            'file' => 'required|file|image',
+		$auction->name = $request->name;
+		$auction->description = $request->description;
+		$auction->min_price = $request->min_price;
 
-        ]);
+		$request->file->move($upload_path, $generated_new_name);
 
-        $auction = new Auction();
+		$auction->photo_url = $generated_new_name;
 
-        $user = User::where('email', $request->email)->first();
+		$auction->start = Carbon::now();
 
-        $auction->owner_id = $user->id;
+		$auction->save();
 
-        $auction->name = $request->name;
-        $auction->description = $request->description;
-        $auction->min_price = $request->min_price;
+		return response()->json(['message' => 'You have successfully created the auction "'
+			. $auction->name . '"']);
+	}
 
-        $request->file->move($upload_path, $generated_new_name);
+	public function userAuctions(Request $request)
+	{
 
-        $auction->photo_url = $generated_new_name;
+		$user = Auth::user();
+		$close = true;
 
-        $auction->start = Carbon::now();
+		switch ($request->set) {
 
-        $auction->save();
+			case 'active':
 
-        return response()->json(['message' => 'You have successfully created the auction "'
-            . $auction->name . '"']);
+				$auctions = Auction::where('owner_id', $user->id)
+					->where('end', null)
+					->orderBy('created_at', 'ASC')
+					->get();
 
-    }
+				$message = "You dont have any active auctions yet";
 
-    public function userAuctions(Request $request){
+				break;
 
-        $user = User::where('email', $request->email)->first();
-        $close = true;
+			case 'closed':
 
-        switch ($request->set) {
+				$auctions = Auction::where('owner_id', $user->id)->where('end', '<>', null)->get();
+				$message = "You dont have closed auctions yet";
 
-            case 'active':
+				break;
 
-                $auctions = Auction::where('owner_id', $user->id)
-                    ->where('end', null)
-                    ->orderBy('created_at', 'ASC')
-                    ->get();
+			case 'won':
 
-                $message = "You dont have any active auctions yet";
+				$auctions = Auction::where('last_bid_user_id', $user->id)->where('end', '<>', null)->get();
+				$message = "You havent won any auctions yet";
 
-            break;
+				break;
 
-            case 'closed':
+			case 'bidded':
 
-                $auctions = Auction::where('owner_id', $user->id)->where('end', '<>', null)->get();
-                $message = "You dont have closed auctions yet";
+				$auctions = Auction::where('last_bid_user_id', $user->id)->where('end', null)->get();
+				$message = "You dont have any bidded auctions";
+				$close = false;
 
-            break;
+				break;
 
-            case 'won':
+			default:
 
-                $auctions = Auction::where('last_bid_user_id', $user->id)->where('end', '<>', null)->get();
-                $message = "You havent won any auctions yet";
+				$auctions = Auction::where('owner_id', $user->id)->get();
+				$message = "You dont have any auctions yet";
 
-            break;
+				break;
+		}
 
-            case 'bidded':
+		if (count($auctions) > 0) {
+			return ["auctions" => $auctions, "close" => $close];
+		} else {
+			return ["message" => $message, "code" => 206];
+		}
+	}
 
-                $auctions = Auction::where('last_bid_user_id', $user->id)->where('end', null)->get();
-                $message = "You dont have any bidded auctions";
-                $close = false;
+	public function bidAuction(Request $request)
+	{
 
-            break;
-            
-            default:
-                    
-                $auctions = Auction::where('owner_id', $user->id)->get();
-                $message = "You dont have any auctions yet";
+		$auction = Auction::find($request->id);
+		$user = Auth::user();
 
-            break;
-            
-        }
+		if ($user->id == $auction->owner_id) {
+			return response()->json(["message" => "You cant bid your own auctions"], 406);
+		}
 
-        if(count($auctions) > 0){
-            return ["auctions" => $auctions, "close" => $close];
-        }else{
-            return ["message" => $message,"code" => 206];
-        }     
+		if ($auction->last_bid_price == null) {
+			if ($request->bidPrice <= $auction->min_price) {
+				return response()->json(["message" => "You must bid greater than " . $auction->min_price . " €"], 206);
+			}
+		} else {
+			if ($request->bidPrice <= $auction->last_bid_price) {
+				return response()->json(["message" => "You must bid greater than " . $auction->last_bid_price . " €"], 206);
+			}
+		}
 
-    }
+		$balance = $user->wallet->balance;
+		if ($balance <= $auction->last_bid_price) {
+			return response()->json(["message" => "You dont have enough funds to bid this auction"], 206);
+		}
 
-    public function bidAuction(Request $request){
+		$auction->last_bid_price = $request->bidPrice;
+		$auction->last_bid_user_id = $user->id;
 
-        $auction = Auction::find($request->id);
-        $user = User::where('email', $request->email)->first();
 
-        if($user->id == $auction->owner_id){
-            return ["message" => "You cant bid your own auctions", "code" => 206];
-        }
+		$auction->save();
 
-        if($auction->last_bid_price == null){
-            if($request->bidPrice <= $auction->min_price){
-                return ["message" => "You must bid greater than " . $auction->min_price . " €", "code" => 206];
-            }
-        }else{
-            if($request->bidPrice <= $auction->last_bid_price){
-                return ["message" => "You must bid greater than " . $auction->last_bid_price . " €", "code" => 206];
-            }
-        }
+		return response()->json(["message" => "Auction " . $auction->name . " bidded with " . $request->bidPrice . " €", "balance" => $balance]);
+	}
 
-        $auction->last_bid_price = $request->bidPrice;
-        $auction->last_bid_user_id = $user->id;
+	public function closeAuction(Request $request)
+	{
 
-        $auction->save();
+		$auction = Auction::findOrFail($request->id);
 
-        return ["message" => "Auction ". $auction->name ." bidded with " . $request->bidPrice . " €", "code" => 200];
+		if ($auction->end != null) {
+			return response()->json(["message" => "Auction already closed"], 400);
+		}
 
-    }
+		$owner = Auth::user();
 
-    public function closeAuction(Request $request){
+		if ($auction->owner_id == $owner->id) {
+			$auction->end = Carbon::now();
+		} else {
+			return response()->json(["message" => "You cant close this auction"], 203);
+		}
 
-        $auction = Auction::findOrFail($request->id);
+		$transfer = (object) ['auction' => $auction];
+		$walletController = new UserWalletController();
+		$balance = $walletController->transfer($transfer);
 
-        if($auction->end != null){
-            return ["message" => "Auction already closed", "code" => 400];
-        }
+		$auction->save();
 
-        $user = User::where('email', $request->email)->first();
-
-        if($auction->owner_id == $user->id){
-            $auction->end = Carbon::now();    
-        }else{
-            return ["message" => "You cant close this auction", "code" => 203];
-        }
-        
-        $auction->save();
-
-        return ["message" => "Auction ended", "code" => 200];
-
-    }
-
-    
+		return response()->json(["message" => "Auction ended", "balance" => $balance]);
+	}
 }
