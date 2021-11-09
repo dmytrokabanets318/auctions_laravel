@@ -15,11 +15,24 @@ app.listen(8080, function() {
 });
 
 
+const { emit } = require("process");
 var LoggedUsers = require("./loggedusers.js");
 let loggedUsers = new LoggedUsers();
 
 io.on("connection", function(socket) {
+
   console.log("client has connected (socket ID = " + socket.id + ")");
+
+  socket.on("refresh", function(user){
+
+    let loggedUser = loggedUsers.userInfoByID(user.id);
+
+    if(loggedUser){
+      console.log(`Chaning socket id of user ${user.id} from ${loggedUser.socketID} to ${socket.id}`);
+      loggedUser.socketID = socket.id;
+    }
+
+  });
 
   socket.on("user_enter", function(user) {
     if (user) {
@@ -56,6 +69,21 @@ io.on("connection", function(socket) {
 
     if(last_user){
       io.to(last_user.socketID).emit("auction_bidded", {message: message});
+    }
+
+  });
+
+  socket.on("auction_closed", function(auction){
+
+    console.log(`User ${auction.owner_id} closed auction "${auction.name}"`);
+    console.log(`User ${auction.last_bid_user_id} paid owner ${auction.last_bid_price}`);
+    
+    let last_user = loggedUsers.userInfoByID(auction.last_bid_user_id);
+
+    if(last_user){
+      io.to(last_user.socketID).emit("auction_closed", {
+        auction: auction, 
+        message: `Auction "${auction.name}" was closed. ${auction.last_bid_price}€ were transfered from your account`});
     }
 
   });

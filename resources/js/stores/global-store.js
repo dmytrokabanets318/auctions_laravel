@@ -76,7 +76,9 @@ export default new Vuex.Store({
 
         setBalance(state, wallet){
             console.log("Store wallet", wallet);
-            this.state.wallet.balance = wallet.balance;
+            if(wallet.balance){
+                this.state.wallet.balance = wallet.balance;
+            }
             if(wallet.reserved){
                 this.state.wallet.reserved = wallet.reserved;
             }
