@@ -80,7 +80,7 @@ class AuctionsController extends Controller {
 			return response()->json(["message" => "There are no auctions available with that name"], 206);
 		}
 
-		return $auctions;
+		return response()->json(["auctions" => $auctions]);
 	}
 
 	public function store(Request $request) {
