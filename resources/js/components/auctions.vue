@@ -218,6 +218,7 @@ export default {
 		...mapGetters({
 			api_token: 'getUserToken',
 			user: "getUser",
+			wallet: "getWallet"
 		}),
 	},
 
@@ -230,15 +231,13 @@ export default {
 			}
 
 			if (data.auction) {
-
 				//TODO Get wallet after bidding
-				this.auctions.find(async (auction) => {
+				this.auctions.find(auction => {
 					if (auction.id === data.auction.id) {
 						auction.last_bid_user_id = data.auction.last_bid_user_id;
 						auction.last_bid_price = data.auction.last_bid_price;
-						await this.$axios.get('/api/wallet', { headers: { 'Authorization': `Bearer ${this.api_token}` } })
+						this.$axios.get('/api/wallet', { headers: { 'Authorization': `Bearer ${this.api_token}` } })
 							.then(response => {
-								console.log("Getting here");
 								this.$store.commit("setBalance", { balance: response.data.balance, reserved: response.data.reserved });
 							}).catch(error => {
 								console.log(error);
@@ -283,7 +282,7 @@ export default {
 
 			if (!bidPrice || bidPrice == '' || bidPrice == 0) {
 				return;
-			}
+			}				
 
 			const options = {
 				method: 'PUT',
@@ -294,7 +293,7 @@ export default {
 
 			const last_user_id = auction.last_bid_user_id;
 
-			this.$axios(options).then((response) => {
+			this.$axios(options).then(response => {
 
 				if (response.status != 200) {
 					this.$toasted.error(response.data.message);
