@@ -27,7 +27,7 @@ class AuctionsController extends Controller {
 
 		if ($order[0] == 'last_bid_price') {
 
-			foreach ($auctions as $auction) {
+			foreach ($auctions as $auction) {	
 
 				if ($auction->last_bid_price == 0 || $auction->last_bid_price == null) {
 					$auction['orderByPrice'] = $auction->min_price;
@@ -179,7 +179,7 @@ class AuctionsController extends Controller {
 		$user = Auth::user();
 
 		if ($user->id == $auction->owner_id) {
-			return response()->json(["message" => "You cant bid your own auctions"], 406);
+			return response()->json(["message" => "You cant bid your own auctions"], 206);
 		}
 
 		if ($auction->last_bid_price == null) {
@@ -192,8 +192,10 @@ class AuctionsController extends Controller {
 			}
 		}
 
-		$balance = $user->wallet->balance;
-		if ($balance <= $auction->last_bid_price) {
+		$user_wallet = UserWalletController::getUserWallet($user->id);
+		$balance = $user_wallet->balance;	
+
+		if ($balance <= $request->bidPrice) {
 			return response()->json(["message" => "You dont have enough funds to bid this auction"], 206);
 		}
 
@@ -202,20 +204,20 @@ class AuctionsController extends Controller {
 			$last_user_wallet = UserWalletController::getUserWallet($last_user->id);
 
 			$last_user_wallet = Wallet::where('holder_id', $auction->last_bid_user_id)->first();
-			$last_user_wallet->reserved -= $auction->last_bid_price;
-			$last_user_wallet->balance += $auction->last_bid_price;
+			$last_user_wallet->reserved = $last_user_wallet->reserved - $auction->last_bid_price;
+			//FIXME THIS CANNOT BE DEPOSIT, BALANCE SHOULD BE UPDATED ANOTHER WAY
+			$last_user_wallet->deposit($auction->last_bid_price);
 			$last_user_wallet->save();
 		}
 
 		$auction->last_bid_price = $request->bidPrice;
 		$auction->last_bid_user_id = $user->id;
 
-		$user_wallet = UserWalletController::getUserWallet($user->id);
+		$reserved = $user_wallet->reserved + $request->bidPrice;
+		//FIXME THIS CANNOT BE WHITDRAW, BALANCE SHOULD BE UPDATED ANOTHER WAY
+		$user_wallet->withdraw($request->bidPrice);
 
-		$reserved = $user_wallet->reserved = $user_wallet->reserved + $request->bidPrice;
-		error_log(print_r($user_wallet, TRUE)); 
-		$newBalance = $user_wallet->balance = $user_wallet->balance - $request->bidPrice;
-		error_log(print_r($user_wallet, TRUE)); 
+		$user_wallet->reserved = $reserved;
 
 		$user_wallet->save();
 		error_log(print_r($user_wallet, TRUE)); 
@@ -224,7 +226,7 @@ class AuctionsController extends Controller {
 
 		return response()->json([
 			"message" => "Auction " . $auction->name . " bidded with " . $request->bidPrice . " €", 
-			"balance" => $newBalance, 
+			"balance" => $user_wallet->balance,
 			"reserved" => $reserved
 		]);
 
@@ -239,31 +241,26 @@ class AuctionsController extends Controller {
 		}
 
 		$owner = Auth::user();
-		if ($auction->owner_id == $owner->id) {
-			$auction->end = Carbon::now();
-		} else {
+		if ($auction->owner_id != $owner->id) {
 			return response()->json(["message" => "You cant close this auction"], 203);
 		}
 
-		$owner_wallet = Wallet::where('holder_id', $owner->id)->first();
-		$user_wallet = Wallet::where('holder_id', $auction->last_bid_user_id)->first();
+		$auction->end = Carbon::now();
 
-		if($user_wallet->reserved >= $auction->last_bid_price){
+		$owner_wallet = UserWalletController::getUserWallet($auction->owner_id);
+		$user_wallet = UserWalletController::getUserWallet($auction->last_bid_user_id);
 
-			$payment = $auction->last_bid_price;
-			$user_wallet->reserved -= $payment;
-			$user_wallet->balance += $payment;
-
-			$user_wallet->transfer($owner_wallet, $payment);
-
-			// $transfer = (object) ['auction' => $auction];
-			// $walletController = new UserWalletController();
-			// $balance = $walletController->transfer($transfer);
-
-		}else{
+		$payment = $auction->last_bid_price;
+		if($user_wallet->reserved < $payment){
 			return response()->json(["message" => "Unknown error ocured, try again later"], 500);
 		}
 
+		//FIXME THIS CANNOT BE DEPOSIT, BALANCE SHOULD BE UPDATED ANOTHER WAY
+		$user_wallet->deposit($payment);
+		$user_wallet->reserved -= $payment;
+		$user_wallet->save();
+
+		$user_wallet->transfer($owner_wallet, $payment);
 		$auction->save();
 
 		return response()->json(["message" => "Auction ended", "balance" => $owner_wallet->balance]);
