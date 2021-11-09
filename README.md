@@ -17,24 +17,29 @@ This application also uses **Socket.io** for real time changes in auctions.
 
 ## How to
 
-	 Deploy:
+Deploy:
 	 
-		 php artisan migrate:fresh --seed
-		 php artisan serve
-		 npm run watch
+	php artisan migrate:fresh --seed
+	php artisan serve
+	npm run watch
   
-	With socket io:
-	  node WebSocketServer/server.js
+With socket io:
+	
+	node WebSocketServer/server.js
+  
   ##### You may need to update with composer
- 
-	 Use:
+--- 
+Use:
 	 
-		 Login with any user from user0 to user5 -> "'user0'@mail.com" and password "123"
-		 OR
-		 Register a new account
+>Login with any user from user0 to user5 -> "'user0'@mail.com" and password "123"
+>
+>OR
+>
+>Register a new account
 		 
-		 Increase balance
-		 Open another tab to visualize real time data exchange
+>Increase balance
+>
+>Open another tab to visualize real time data exchange
 
 ## Future features
 
