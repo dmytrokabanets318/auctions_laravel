@@ -100,6 +100,7 @@ export default {
           this.$store.commit("storeUserId", user.id);
           this.$store.commit('storeWallet', user.wallet);
 
+          this.$axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.api_token}`;
           this.$router.push("/auctions");
           
         })
