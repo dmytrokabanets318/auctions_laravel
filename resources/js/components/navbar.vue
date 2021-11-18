@@ -85,7 +85,6 @@ export default {
 
   created() {
     
-    console.log("Navbar auth", this.auth);
     this.$socket.emit("refresh", this.auth);
 
     if(this.auth){

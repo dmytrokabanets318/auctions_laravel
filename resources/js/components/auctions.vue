@@ -282,7 +282,12 @@ export default {
 
 			if (!bidPrice || bidPrice == '' || bidPrice == 0) {
 				return;
-			}				
+			}
+
+			if(auction.last_bid_user_id === this.user.id){
+				this.$toasted.show(`Current auction already bidded with ${auction.last_bid_price}`);
+				return;
+			}
 
 			const options = {
 				method: 'PUT',
