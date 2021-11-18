@@ -25,11 +25,16 @@ io.on("connection", function(socket) {
 
   socket.on("refresh", function(user){
 
-    let loggedUser = loggedUsers.userInfoByID(user.id);
+    if(user){
 
-    if(loggedUser){
-      console.log(`Chaning socket id of user ${user.id} from ${loggedUser.socketID} to ${socket.id}`);
-      loggedUser.socketID = socket.id;
+      let loggedUser = loggedUsers.userInfoByID(user.id);
+  
+      if(loggedUser){
+        let message = `Chaning socket id of user ${user.id} from ${loggedUser.socketID} to ${socket.id}`; 
+        console.log(message);
+        loggedUser.socketID = socket.id;
+      }
+      
     }
 
   });
