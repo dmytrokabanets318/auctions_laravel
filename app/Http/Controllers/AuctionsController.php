@@ -178,6 +178,10 @@ class AuctionsController extends Controller {
 		$auction = Auction::find($request->id);
 		$user = Auth::user();
 
+		if($auction->last_bid_user_id == $user->id){
+			return response()->json(["mesagge" => "Current auction already bidded with " . $auction->last_bid_price], 206);
+		}
+
 		if ($user->id == $auction->owner_id) {
 			return response()->json(["message" => "You cant bid your own auctions"], 206);
 		}
