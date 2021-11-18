@@ -84,16 +84,21 @@ export default {
   },
 
   created() {
+    
+    console.log("Navbar auth", this.auth);
+    this.$socket.emit("refresh", this.auth);
 
-    this.$axios.get("/api/wallet", {
-      headers: {
-        'Authorization' : `Bearer ${this.api_token}`
-        }
-    }).then(response => {
-      this.$store.commit('setBalance', {balance: response.data.balance, reserved: response.data.reserved});
-    }).catch(error => {
-      console.log(error);
-    });
+    if(this.auth){
+      this.$axios.get("/api/wallet", {
+        headers: {
+          'Authorization' : `Bearer ${this.api_token}`
+          }
+      }).then(response => {
+        this.$store.commit('setBalance', {balance: response.data.balance, reserved: response.data.reserved});
+      }).catch(error => {
+        console.log(error);
+      });
+    }
 
   }
 
