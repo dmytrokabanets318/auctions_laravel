@@ -63,6 +63,39 @@ export default {
 		})
 	},
 
+  sockets: {
+    
+    //Navbar component doesnt have auctions 
+		// auction_closed(data) {
+
+		// 	let closedAuction = this.auctions.find(auction => {
+
+		// 		if (data.auction.id === auction.id) {
+		// 			console.log("Auction found!", auction);
+		// 			auction = closedAuction;
+		// 			console.log("Changed auction!", auction);
+		// 			console.log("All auctions", this.auctions);
+
+		// 			this.$axios.get("/api/wallet", {
+		// 				headers: {
+		// 					'Authorization': `Bearer ${this.api_token}`
+		// 				}
+		// 			}).then(response => {
+		// 				this.$store.commit('setBalance', { balance: response.data.balance, reserved: response.data.reserved });
+		// 			}).catch(error => {
+		// 				console.log(error);
+		// 			});
+		// 		}
+		// 	});
+
+		// 	if (data.message) {
+		// 		Vue.$toasted.show(data.message);
+		// 	}
+
+		// }
+
+  },
+
   methods: {
     logout() {
 
