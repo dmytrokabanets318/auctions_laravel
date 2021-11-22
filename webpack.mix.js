@@ -16,4 +16,4 @@ mix.js('resources/js/app.js', 'public/js')
         //
     ])
     .vue({ version: 2 })
-    .browserSync('localhost:8000');;
+    .browserSync('localhost:8000');

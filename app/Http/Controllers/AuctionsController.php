@@ -199,7 +199,7 @@ class AuctionsController extends Controller {
 		$user_wallet = UserWalletController::getUserWallet($user->id);
 		$balance = $user_wallet->balance;	
 
-		if ($balance <= $request->bidPrice) {
+		if ($balance < $request->bidPrice) {
 			return response()->json(["message" => "You dont have enough funds to bid this auction"], 206);
 		}
 

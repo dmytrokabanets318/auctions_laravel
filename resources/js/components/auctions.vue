@@ -196,6 +196,7 @@ export default {
 	data() {
 		return {
 			auctions: [],
+			auctionsByUser: {},
 			hasAuctions: false,
 			search: "",
 			hasSearchedAuctions: true,
@@ -232,7 +233,13 @@ export default {
 
 			if (data.auction) {
 				//TODO Get wallet after bidding
-				this.auctions.find(auction => {
+
+				let auctions = this.auctions;
+				if(this.auctionsByUser.has(data.auction.owner_id)){
+					auctions = this.auctionsByUser.get(data.auction.owner_id);
+				}
+
+				auctions.find(auction => {
 					if (auction.id === data.auction.id) {
 						auction.last_bid_user_id = data.auction.last_bid_user_id;
 						auction.last_bid_price = data.auction.last_bid_price;
@@ -246,6 +253,34 @@ export default {
 				});
 
 			}
+		},
+
+		auction_closed(data) {
+
+			let auctions = this.auctions;
+			if(this.auctionsByUser.has(data.auction.owner_id)){
+				auctions = this.auctionsByUser.get(data.auction.owner_id);
+			}
+
+			let closedAuctionIndex = auctions.findIndex(auction => {
+				return data.auction.id === auction.id;
+			});
+					
+			this.auctions.splice(closedAuctionIndex, 1);
+			this.$axios.get("/api/wallet", {
+				headers: {
+					'Authorization': `Bearer ${this.api_token}`
+				}
+			}).then(response => {
+				this.$store.commit('setBalance', { balance: response.data.balance, reserved: response.data.reserved });
+			}).catch(error => {
+				console.log(error);
+			});
+
+			if (data.message) {
+				Vue.toasted.show(data.message);
+			}
+			
 		}
 
 	},
@@ -318,7 +353,7 @@ export default {
 			}).catch((error) => {
 				console.log(error);
 			}).finally(() => {
-				bidPrice = '';
+				auction.bid_price = '';
 			});
 		},
 
@@ -364,8 +399,19 @@ export default {
 	},
 
 	async created() {
+
 		await this.getAuctions();
 		this.isRenderReady = true;
+
+		this.auctionsByUser = new Map();
+		this.auctions.forEach(auction => {
+			if(!this.auctionsByUser.has(auction.owner_id)){
+				this.auctionsByUser.set(auction.owner_id, []);
+			}
+			let auctionsList = this.auctionsByUser.get(auction.owner_id);
+			auctionsList.push(auction);
+		});
+
 	},
 };
 </script>
