@@ -265,7 +265,7 @@ export default {
 			let closedAuctionIndex = auctions.findIndex(auction => {
 				return data.auction.id === auction.id;
 			});
-					
+	
 			this.auctions.splice(closedAuctionIndex, 1);
 			this.$axios.get("/api/wallet", {
 				headers: {
