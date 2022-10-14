@@ -14,7 +14,6 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-    'cipher' => 'AES-256-CBC',
     
 
     /*
@@ -121,7 +120,7 @@ return [
     |
     */
 
-    'key' => env('APP_KEY'),
+    'key' => 'base64:pv8MBH6Pg2sxqIVbnY4+LXZFvuvizBkUiEcUU+4kzDE=',
 
     'cipher' => 'AES-256-CBC',
 
