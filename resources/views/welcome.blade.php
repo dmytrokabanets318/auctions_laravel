@@ -10,6 +10,7 @@
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link rel="stylesheet" href="{{asset('css/app.css')}}">
         <link rel="icon" href="{{ URL::to('/') }}/favicon.svg">
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
     </head>   
 
