@@ -69,6 +69,12 @@ export default {
   },
 
   methods: {
+
+    ...mapMutations([
+      'revokeUser',
+      'revokeToken'
+    ]),
+
     login() {
 
       this.alert.show = false;
