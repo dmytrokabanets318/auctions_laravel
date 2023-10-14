@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use \App\Http\Controllers\UserWalletController;
+use App\Http\Controllers\AuctionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,12 +32,22 @@ Route::get('/auctions', 'AuctionsController@index');
 Route::post('/logout', 'UsersController@logout');
 
 // Make sure only authenticated users can bid and close auctions
-Route::middleware('auth:api')->put('/auction/{id}', 'AuctionsController@bidAuction');
-Route::middleware('auth:api')->put('/auction/{id}/close', 'AuctionsController@closeAuction');
-Route::middleware('auth:api')->post('/auction', 'AuctionsController@store');
-Route::middleware('auth:api')->get('/auctions/{email}', 'AuctionsController@userAuctions');
 
-Route::middleware('auth:api')->get('/wallet', 'UserWalletController@getBalance');
-Route::middleware('auth:api')->put('/wallet/deposit', 'UserWalletController@deposit');
-Route::middleware('auth:api')->put('/wallet/withdraw', 'UserWalletController@withdraw');
-Route::middleware('auth:api')->put('/wallet/transfer', 'UserWalletController@transfer');
+Route::middleware('auth:api')->group(function () {
+
+    Route::prefix('/auction')->group(function () {
+        Route::put('{id}', 'AuctionsController@bidAuction');
+        Route::put('/{id}/close', 'AuctionsController@closeAuction');
+        Route::post('/', 'AuctionsController@store');
+        Route::get('/{email}', 'AuctionsController@userAuctions');
+    });
+
+    Route::prefix('/wallet')->group(function () {
+        Route::get('/', 'UserWalletController@getBalance');
+        Route::put('/deposit', 'UserWalletController@deposit');
+        Route::put('/withdraw', 'UserWalletController@withdraw');
+        Route::put('/transfer', 'UserWalletController@transfer');
+    });
+
+});
+

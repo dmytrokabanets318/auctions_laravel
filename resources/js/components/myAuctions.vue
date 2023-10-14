@@ -5,24 +5,13 @@
 			<div class="col-10">
 				<nav class="navbar navbar-toggleable-md navbar-light bg-faded">
 					<ul class="nav nav-tabs">
-						<li
-							class="nav-item"
-							v-for="(item, index) in auctionTypes"
-							:key="index"
-						>
-							<a
-								:class="
-									activeTab == item.type
-										? 'nav-link active btn activeTab'
-										: 'nav-link btn'
-								"
-								@click="changeActiveAuctions(item.type)"
-								data-toggle="collapse"
-								:data-target="'#confirmation-' + auctionToClose"
-								aria-expanded="false"
-								aria-controls="confirmation"
-								>{{ item.label }}</a
-							>
+						<li class="nav-item" v-for="(item, index) in auctionTypes" :key="index">
+							<a :class="activeTab == item.type
+								? 'nav-link active btn activeTab'
+								: 'nav-link btn'
+								" @click="changeActiveAuctions(item.type)" data-toggle="collapse"
+								:data-target="'#confirmation-' + auctionToClose" aria-expanded="false" aria-controls="confirmation">{{
+									item.label }}</a>
 						</li>
 					</ul>
 
@@ -42,11 +31,7 @@
 
 		<div v-if="isRenderReady">
 			<div v-if="hasAuctions">
-				<div
-					class="row mt-3"
-					v-for="(auction, auction_index) in auctions"
-					:key="auction_index"
-				>
+				<div class="row mt-3" v-for="(auction, auction_index) in auctions" :key="auction_index">
 					<div class="col"></div>
 					<div class="col-8">
 						<div class="card">
@@ -57,21 +42,12 @@
 							</div>
 							<div class="card-body">
 								<p class="card-text">{{ auction.description }}</p>
-								<img
-									class="border border-gray border-rounded"
-									style="float: right; position: relative"
-									:src="'upload\\' + auction.photo_url"
-									alt="Auction image"
-									width="200"
-									height="150"
-								/>
+								<img class="border border-gray border-rounded" style="float: right; position: relative"
+									:src="'upload\\' + auction.photo_url" alt="Auction image" width="200" height="150" />
 
 								Start date: {{ auction.start }}
-								<span
-									class="border border-danger rounded ml-3"
-									v-if="auction.end != null"
-									>End date: {{ auction.end }}</span
-								>
+								<span class="border border-danger rounded ml-3" v-if="auction.end != null">End date: {{ auction.end
+								}}</span>
 								<br />
 								Minumum price: {{ auction.min_price }}
 								<br />
@@ -80,16 +56,9 @@
 								</p>
 
 								<div v-if="canClose">
-									<button
-										type="button"
-										class="btn btn-danger"
-										v-if="auction.end == null"
-										data-toggle="collapse"
-										:data-target="'#confirmation-' + auction.id"
-										aria-expanded="false"
-										aria-controls="confirmation"
-										@click="auctionToClose = auction.id"
-									>
+									<button type="button" class="btn btn-danger" v-if="auction.end == null" data-toggle="collapse"
+										:data-target="'#confirmation-' + auction.id" aria-expanded="false" aria-controls="confirmation"
+										@click="auctionToClose = auction.id">
 										Close Auction
 									</button>
 								</div>
@@ -101,29 +70,17 @@
 									<div class="container">
 										<h3>Are you sure you want to close the auction?</h3>
 
-										<button
-											type="button"
-											class="btn btn-success"
-											@click="closeAuction(auction)"
-											style="
+										<button type="button" class="btn btn-success" @click="closeAuction(auction)" style="
 												margin-left: 20px;
 												padding-left: 100px;
 												padding-right: 100px;
-											"
-											data-toggle="collapse"
-											:data-target="'#confirmation-' + auction.id"
-										>
+											" data-toggle="collapse" :data-target="'#confirmation-' + auction.id">
 											Yes
 										</button>
 
-										<button
-											type="button"
-											class="btn btn-danger"
-											data-toggle="collapse"
-											:data-target="'#confirmation-' + auction.id"
-											style="padding-left: 100px; padding-right: 100px"
-											@click="console.log(auctionToClose)"
-										>
+										<button type="button" class="btn btn-danger" data-toggle="collapse"
+											:data-target="'#confirmation-' + auction.id" style="padding-left: 100px; padding-right: 100px"
+											@click="console.log(auctionToClose)">
 											No
 										</button>
 									</div>
@@ -230,8 +187,9 @@ export default {
 		getUserAuctions(type) {
 
 			this.isRenderReady = false;
+			console.log(this.$store);
 
-			let url = "api/auctions/" + this.$store.state.user + "?set=" + type;
+			let url = "api/auction/" + this.$store.state.user.email + "?set=" + type;
 
 			this.$axios
 				.get(url, {
@@ -284,7 +242,7 @@ export default {
 					}
 				}).then(response => {
 					this.$store.commit('setBalance', { balance: response.data.balance, reserved: response.data.reserved });
-          this.$socket.emit('auction_closed', auction);
+					this.$socket.emit('auction_closed', auction);
 				}).catch(error => {
 					console.log(error);
 				});
